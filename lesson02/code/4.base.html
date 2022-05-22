@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>海洋球-04</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas class="webgl"></canvas>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.js"></script>
+    <script type="module">
+        import * as CANNON from 'https://cdn.jsdelivr.net/npm/cannon-es@0.19.0/dist/cannon-es.js';
+        import * as THREE from '../source/three.module.js';
+        import { OrbitControls } from '../source/OrbitControls.js';
+        const canvas = document.querySelector(".webgl");
+
+        // Scene
+        const scene = new THREE.Scene()
+
+        const gui = new dat.GUI();
+
+        // Ambient light
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+        scene.add(ambientLight)
+
+        // Directional light
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+        directionalLight.position.set(2, 2, -1)
+
+        scene.add(directionalLight)
+
+        // Sphere
+        const sphereGeometry = new THREE.SphereGeometry(0.5, 20, 20);
+
+        // world
+        const world = new CANNON.World();
+
+        world.gravity.set(0, -9.82, 0);
+
+        const floorShape = new CANNON.Plane();
+        const floorBody = new CANNON.Body();
+        floorBody.mass = 0;
+        floorBody.addShape(floorShape);
+        floorBody.quaternion.setFromAxisAngle(new CANNON.Vec3(-1, 0, 0), Math.PI * 0.5);
+        world.addBody(floorBody);
+
+        // 摩擦系数和弹力系数
+        const defaultMaterial = new CANNON.Material("default");
+
+        const defaultContactMaterial = new CANNON.ContactMaterial(
+            defaultMaterial,
+            defaultMaterial,
+            {
+                restitution: 0.4,
+            }
+        );
+        world.addContactMaterial(defaultContactMaterial);
+        world.defaultContactMaterial = defaultContactMaterial;
+        
+
+        const shape = new CANNON.Sphere(0.5);
+
+        const body = new CANNON.Body({
+            mass: 1,
+            position: new CANNON.Vec3(0, 3, 0),
+            shape: shape,
+            material: defaultMaterial,
+        });
+
+        world.addBody(body);
+       
+        const objectsToUpdate = [];
+
+        const sphereMaterial = new THREE.MeshStandardMaterial({
+            color: '#ff0000'
+        });
+        const mesh = new THREE.Mesh(sphereGeometry, sphereMaterial);
+
+        scene.add(mesh);
+
+        const planeGeometry = new THREE.PlaneGeometry(20, 20);
+        const planeMaterial = new THREE.MeshStandardMaterial({
+            color: '#777777',
+        });
+
+        const plane = new THREE.Mesh(planeGeometry, planeMaterial);
+        plane.rotation.x = -Math.PI * 0.5;
+        scene.add(plane);
+
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
+
+        window.addEventListener('resize', () => {
+            // Update sizes
+            sizes.width = window.innerWidth
+            sizes.height = window.innerHeight
+
+            // Update camera
+            camera.aspect = sizes.width / sizes.height
+            camera.updateProjectionMatrix()
+
+            // Update renderer
+            renderer.setSize(sizes.width, sizes.height)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        })
+
+        // Base camera
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            sizes.width / sizes.height,
+            0.1,
+            1000
+        )
+        camera.position.x = -15
+        camera.position.y = 15
+        camera.position.z = 15
+        scene.add(camera)
+
+
+        const controls = new OrbitControls(camera, canvas)
+        controls.enableDamping = true; // 设置阻尼，需要在 update 调用
+
+        scene.add(camera)
+        const renderer = new THREE.WebGLRenderer({
+            canvas
+        })
+        renderer.setSize(sizes.width, sizes.height)
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        // 新增
+        renderer.shadowMap.enabled = true
+
+        renderer.render(scene, camera);
+
+        window.addEventListener('resize', () => {
+            sizes.width = window.innerWidth;
+            sizes.height = window.innerHeight;
+
+            camera.aspect = sizes.width / sizes.height;
+            camera.updateProjectionMatrix();
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+
+            renderer.setSize(sizes.width, sizes.height)
+        })
+
+        const clock = new THREE.Clock();
+        let oldElapsedTime = 0;
+
+        // Animations 
+        const tick = () => {
+
+            const elapsedTime = clock.getElapsedTime()
+            const deltaTime = elapsedTime - oldElapsedTime;
+            oldElapsedTime = elapsedTime;
+
+            world.step(1 / 60, deltaTime, 3);
+
+            mesh.position.copy(body.position);
+
+            // update controls
+            controls.update();
+
+            renderer.render(scene, camera)
+
+            // Call tick again on the next frame
+            window.requestAnimationFrame(tick)
+        }
+
+        tick();
+
+    </script>
+</body>
+
+</html>
