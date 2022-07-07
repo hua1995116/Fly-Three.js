@@ -132,7 +132,8 @@ void main()
             fragmentShader: fshader
         });
         const cubeMesh = new THREE.Mesh(geometry, cubeMaterial);
-        cubeMesh.rotation.x = - Math.PI / 2
+        // cubeMesh.rotation.x = - Math.PI / 2
+        cubeMesh.position.z = -10
         scene.add(cubeMesh);
 
          /* 核心结束 */
