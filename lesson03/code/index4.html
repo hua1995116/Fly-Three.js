@@ -132,14 +132,13 @@ void main()
             fragmentShader: fshader
         });
         const cubeMesh = new THREE.Mesh(geometry, cubeMaterial);
-        // cubeMesh.rotation.x = - Math.PI / 2
-        cubeMesh.position.z = -10
+        cubeMesh.position.z = -8
         scene.add(cubeMesh);
 
          /* 核心结束 */
 
         // 控制器
-        // const controls = new OrbitControls(camera, canvas);
+        const controls = new OrbitControls(camera, canvas);
         scene.add(camera);
 
         window.addEventListener('resize', () => {
@@ -161,9 +160,7 @@ void main()
             canvas
         })
 
-        const vrBtn = VRButton.createButton( renderer );
-
-        document.body.appendChild( vrBtn );
+        document.body.appendChild( VRButton.createButton( renderer ) );
         renderer.xr.enabled = true;
         // 设置大小
         renderer.setSize(sizes.width, sizes.height)
@@ -201,7 +198,7 @@ void main()
         }
 
         renderer.setAnimationLoop( function () {
-            // controls.update();
+            controls.update();
 
             renderer.render(scene, camera)
             texture.needsUpdate = true;
