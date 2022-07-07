@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>video</title>
+    <style>
+        html,
+        body {
+            margin: 0;
+        }
+        #btn {
+            left: 50%;
+            top: 50%;
+            position: absolute;
+            z-index: 100;
+            width: 200px;
+            height: 50px;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas class="webgl"></canvas>
+    <video id="video" src="./pikachu.mp4" playsinline webkit-playsinline autoplay loop style="display:none"></video>
+    <button id="btn">开始</button>
+    <script src="../../source/webvr-polyfill.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dat.gui@0.7.7/build/dat.gui.js"></script>
+    <script type="module">
+        import * as THREE from '../../source/three.module.js';
+        import { VRButton } from '../../source/jsm/webxr/VRButton.js';
+        import { OrbitControls } from '../../source/OrbitControls.js';
+        // import WebVRPolyfill from '../source/webvr-polyfill.js';
+
+        const polyfill = new WebVRPolyfill();
+
+        const vshader = `
+varying vec2 vUv;
+
+void main() {
+  vUv = uv;
+
+  gl_Position = projectionMatrix * modelViewMatrix * vec4( position, 1.0 );
+}
+`
+        const fshader = `
+varying vec2 vUv;
+
+uniform sampler2D u_tex;
+uniform vec2 acept;
+
+void main()
+{
+  vec2 uv = vec2(0.5) + vUv * acept - acept*0.5;
+  vec3 color = vec3(0.0);
+  if (uv.x>=0.0 && uv.y>=0.0 && uv.x<1.0 && uv.y<1.0) color = texture2D(u_tex, uv).rgb;
+  gl_FragColor = vec4(color, 1.0);
+}
+`
+
+// varying vec2 vUv;
+
+// uniform sampler2D u_tex;
+// uniform vec2 acept;
+
+// void main()
+// {
+//   vec2 uv = vUv * acept;
+//   vec3 color = vec3(0.3);
+//   if (uv.x>=0.0 && uv.y>=0.0 && uv.x<1.0 && uv.y<1.0) color = texture2D(u_tex, uv).rgb;
+//   gl_FragColor = vec4(color, 1.0);
+// }
+
+// void main()
+// {
+//   vec2 uv = vec2(0.5) + vUv * acept - acept*0.5;
+//   vec3 color = vec3(0.0);
+//   if (uv.x>=0.0 && uv.y>=0.0 && uv.x<1.0 && uv.y<1.0) color = texture2D(u_tex, uv).rgb;
+//   gl_FragColor = vec4(color, 1.0);
+// }
+
+
+        const sizes = {
+            width: window.innerWidth,
+            height: window.innerHeight
+        }
+
+        const canvas = document.querySelector(".webgl");
+
+        // 场景
+        const scene = new THREE.Scene();
+
+        // 相机
+        const camera = new THREE.PerspectiveCamera(
+            75,
+            sizes.width / sizes.height,
+            0.1,
+            1000
+        )
+        camera.position.x = 0
+        camera.position.y = 0
+        camera.position.z = 5
+        scene.add(camera);
+
+        // 添加光照
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.5)
+        scene.add(ambientLight)
+
+        const directionalLight = new THREE.DirectionalLight(0xffffff, 0.5)
+        directionalLight.position.set(2, 2, -1)
+
+        scene.add(directionalLight)
+
+        /* 核心逻辑 */
+        // 添加屏幕
+        const video = document.getElementById( 'video' );
+        
+        const texture = new THREE.VideoTexture( video );
+        const uniforms = {
+            u_tex: { value: texture},
+            acept: { value: new THREE.Vector2(1, 16/9)}
+        }
+
+        const geometry = new THREE.BoxGeometry(5, 5, 0.2);
+        const cubeMaterial = new THREE.ShaderMaterial({
+            // color: '#ff0000'
+            // map: texture
+            uniforms: uniforms,
+            vertexShader: vshader,
+            fragmentShader: fshader
+        });
+        const cubeMesh = new THREE.Mesh(geometry, cubeMaterial);
+        cubeMesh.rotation.x = - Math.PI / 2
+        scene.add(cubeMesh);
+
+         /* 核心结束 */
+
+        // 控制器
+        // const controls = new OrbitControls(camera, canvas);
+        scene.add(camera);
+
+        window.addEventListener('resize', () => {
+            // 设置大小
+            sizes.width = window.innerWidth
+            sizes.height = window.innerHeight
+
+            // 更新相机
+            camera.aspect = sizes.width / sizes.height
+            camera.updateProjectionMatrix()
+
+            // 更新渲染器
+            renderer.setSize(sizes.width, sizes.height)
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        })
+
+        // 设置渲染器
+        const renderer = new THREE.WebGLRenderer({
+            canvas
+        })
+
+        const vrBtn = VRButton.createButton( renderer );
+
+        document.body.appendChild( vrBtn );
+        renderer.xr.enabled = true;
+        // 设置大小
+        renderer.setSize(sizes.width, sizes.height)
+        // 设置像素比
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2))
+        renderer.render(scene, camera);
+
+        // const tick = () => {
+        //     controls.update();
+
+        //     renderer.render(scene, camera)
+        //     texture.needsUpdate = true;
+
+        //     window.requestAnimationFrame(tick)
+        // }
+
+        // tick();
+
+        btn.onclick = () => {
+            video.play();
+            btn.style.display = "none";
+            if (typeof DeviceOrientationEvent.requestPermission === 'function') {
+                DeviceOrientationEvent.requestPermission()
+                    .then(permissionState => {
+                    if (permissionState === 'granted') {
+                        // handle data
+                    } else {
+                        // handle denied
+                    }
+                    })
+                    .catch((err) => {
+                        console.log(err)
+                    });
+            }
+        }
+
+        renderer.setAnimationLoop( function () {
+            // controls.update();
+
+            renderer.render(scene, camera)
+            texture.needsUpdate = true;
+
+        } );
+
+        function onDeviceOrientationChange (e) {
+    console.log(e)
+}
+
+window.addEventListener("deviceorientation", onDeviceOrientationChange, false);
+
+    </script>
+</body>
+
+</html>
