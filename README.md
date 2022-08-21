@@ -7,3 +7,7 @@ Three.js 系列文章
 - [02 Three.js系列: 造个海洋球池来学习物理引擎](https://qiufeng.blue/three/lesson02.html)
 
 - [03 Three.js系列: 在元宇宙看电影，享受 VR 视觉盛宴](https://qiufeng.blue/three/lesson03.html)
+
+- [04 细数实现全景图VR的几种方式（panorama/cubemap/eac）](https://qiufeng.blue/three/lesson03.html)
+
+细数实现全景图VR的几种方式（panorama/cubemap/eac）
