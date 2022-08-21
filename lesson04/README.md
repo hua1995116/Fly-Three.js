@@ -10,8 +10,18 @@ ffmpeg -i example.jpg -vf v360=input=equirect:output=c3x2 example-cube.jpg
 
 demo体验：
 
+panorama: https://fly-three-js.vercel.app/lesson04/index-panorama.html
+
+[![Edit hungry-wave-94vezw](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/hungry-wave-94vezw?fontsize=14&hidenavigation=1&theme=dark)
+
 cube: https://fly-three-js.vercel.app/lesson04/index-cube.html
+
+[![Edit cool-https-563g0f](https://codesandbox.io/static/img/play-codesandbox.svg)](https://codesandbox.io/s/cool-https-563g0f?fontsize=14&hidenavigation=1&theme=dark)
 
 eac: https://fly-three-js.vercel.app/lesson04/index-eac.html
 
-panorama: https://fly-three-js.vercel.app/lesson04/index-panorama.html
+
+
+
+
+
