@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Three.js 起飞系列 - lesson04 - eac</title>
+    <link rel='stylesheet' href='https://naver.github.io/egjs-view360/common/css/demo.css'>
+    <link rel='stylesheet' href='https://naver.github.io/egjs-view360/common/css/PanoControls.css'>
+</head>
+
+<body>
+    <script src='https://naver.github.io/egjs-view360/common/js/jquery-2.2.4.js'></script>
+    <script src='https://naver.github.io/egjs-view360/common/js/qrcode.js'></script>
+    <script src='https://naver.github.io/egjs-view360/common/js/screenfull.min.js'></script>
+    <script src='https://naver.github.io/egjs-view360/common/js/PieView.js'></script>
+    <script src='https://naver.github.io/egjs-view360/release/latest/dist/view360.pkgd.js'></script>
+    <script src='https://naver.github.io/egjs-view360/common/js/PanoControls.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/sweetalert2@9.7.2/dist/sweetalert2.all.min.js'></script>
+    <script src='https://cdn.jsdelivr.net/npm/webxr-polyfill@2.0.1/build/webxr-polyfill.min.js'></script>
+    <script src='https://naver.github.io/egjs-view360/common/js/initXR.js'></script>
+
+    <div class="viewer" id="myPanoViewer">
+    </div>
+
+    <script>
+
+        var PanoViewer = eg.view360.PanoViewer;
+        var container = document.getElementById("myPanoViewer");
+        var panoViewer = new PanoViewer(container, {
+            image: "./images/eac/example-eac.jpg",
+            projectionType: "cubestrip",
+            cubemapConfig: {
+                order: "BLFDRU",
+                tileConfig: [{ rotation: 0 }, { rotation: 0 }, { rotation: 0 }, { rotation: 0 }, { rotation: -90 }, { rotation: 180 }],
+                trim: 3
+            }
+        });
+
+        PanoControls.init(container, panoViewer);
+        PanoControls.showLoading();
+    </script>
+</body>
+
+</html>
